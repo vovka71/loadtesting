@@ -1,0 +1,40 @@
+name: CI Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Unit Tests
+        run: echo "Running unit tests..." # Replace with your unit test command
+
+  run-coverage:
+    needs: run-unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Coverage
+        run: |
+            echo "Running coverage..." # Replace with your actual coverage command
+            exit 1 # This command causes the job to fail 
+
+  autoheal-tests:
+    needs: run-coverage
+    if: failure() && needs.run-coverage.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Autoheal Tests
+        run: echo "Autohealing tests..." # Replace with your autoheal test command
+
+  comit-changes:
+    needs: autoheal-tests
+    if: failure() && needs.run-coverage.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Commit Changes
+        run: echo "Commiting Changes..." # Replace with your autoheal test command
